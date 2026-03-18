@@ -9,6 +9,18 @@ var config = require('./config/server')
 
 //Initialize Express
 var app = express()
+const helmet = require('helmet');
+app.use(helmet());
+const cookieParser = require('cookie-parser')
+app.use(cookieParser());
+const winston = require('winston');
+const logger = winston.createLogger({ 
+    transports: [
+        new winston.transports.Console(), 
+        new winston.transports.File({ filename: 'security.log' })
+    ]
+});
+logger.info('Application started');
 require('./core/passport')(passport)
 app.use(express.static('public'))
 app.set('view engine','ejs')

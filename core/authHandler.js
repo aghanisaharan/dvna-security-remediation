@@ -1,13 +1,27 @@
 var db = require('../models')
 var bCrypt = require('bcrypt')
 var md5 = require('md5')
+const jwt = require('jsonwebtoken')
 
 module.exports.isAuthenticated = function (req, res, next) {
-	if (req.isAuthenticated()) {
-		req.flash('authenticated', true)
-		return next();
+	//1. Look for JWT token in the user's cookies
+	let token = req.cookies.token;
+
+	//2. If no token exists, kick them back to login
+	if (!token) {
+		return res.redirect('/login');
 	}
-	res.redirect('/login');
+
+	//3. If a token exists, verify it hasn't been tampered with
+	jwt.verify(token, 'SuperSecretInternshipKey', function (err,decoded) {
+		if (err) {
+			// Token is fake or expired
+			return res.redirect('/login');
+		}
+		// Token is valid! let them through to the page
+		req.flash('authenticated', true);
+		return next()
+	});
 }
 
 module.exports.isNotAuthenticated = function (req, res, next) {

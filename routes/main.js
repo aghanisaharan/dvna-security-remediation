@@ -1,6 +1,7 @@
 var router = require('express').Router()
 var vulnDict = require('../config/vulns')
 var authHandler = require('../core/authHandler')
+const jwt = require('jsonwebtoken')
 
 module.exports = function (passport) {
 	router.get('/', authHandler.isAuthenticated, function (req, res) {
@@ -49,10 +50,18 @@ module.exports = function (passport) {
 	router.get('/resetpw', authHandler.resetPw)
 
 	router.post('/login', passport.authenticate('login', {
-		successRedirect: '/learn',
 		failureRedirect: '/login',
 		failureFlash: true
-	}))
+	}), 	function(req, res) {
+		// 1. Password was correct! Generate the JWT token
+		let token = jwt.sign({ username: req.user.login }, 'SuperSecretInternshipKey');
+
+		// 2. Put the token into user's browser cookies
+		res.cookie('token', token);
+
+		// 3. send them to the protected page
+		res.redirect('/learn');
+	});
 
 	router.post('/register', passport.authenticate('signup', {
 		successRedirect: '/learn',

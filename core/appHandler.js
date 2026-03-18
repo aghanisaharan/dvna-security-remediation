@@ -4,6 +4,7 @@ const exec = require('child_process').exec;
 var mathjs = require('mathjs')
 var libxmljs = require("libxmljs");
 var serialize = require("node-serialize")
+const validator = require('validator')
 const Op = db.Sequelize.Op
 
 module.exports.userSearch = function (req, res) {
@@ -112,10 +113,10 @@ module.exports.modifyProductSubmit = function (req, res) {
 		if (!product) {
 			product = new db.Product()
 		}
-		product.code = req.body.code
-		product.name = req.body.name
-		product.description = req.body.description
-		product.tags = req.body.tags
+		product.code = validator.escape(req.body.code)
+		product.name = validator.escape(req.body.name)
+		product.description = validator.escape(req.body.description)
+		product.tags = validator.escape(req.body.tags)
 		product.save().then(p => {
 			if (p) {
 				req.flash('success', 'Product added/modified!')
